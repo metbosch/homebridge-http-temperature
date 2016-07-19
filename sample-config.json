@@ -12,9 +12,9 @@
 
     "accessories": [
         {
-            "accessory": "HttpHumiditySensor",
-            "name": "Outside Humidity",
-            "url": "http://192.168.1.210/humidity?format=json",
+            "accessory": "HttpTemperatureSensor",
+            "name": "Outside Temperature",
+            "url": "http://192.168.1.210/temperature?format=json",
             "http_method": "GET"
         }
     ]

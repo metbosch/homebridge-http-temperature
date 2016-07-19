@@ -4,11 +4,11 @@ var request = require('sync-request');
 module.exports = function (homebridge) {
    Service = homebridge.hap.Service;
    Characteristic = homebridge.hap.Characteristic;
-   homebridge.registerAccessory("homebridge-http-humidity", "HttpHumidity", HttpHumidity);
+   homebridge.registerAccessory("homebridge-http-temperature", "HttpTemperature", HttpTemperature);
 }
 
 
-function HttpHumidity(log, config) {
+function HttpTemperature(log, config) {
    this.log = log;
 
    // url info
@@ -20,7 +20,7 @@ function HttpHumidity(log, config) {
    this.serial = config["serial"] || "Non-defined serial";
 }
 
-HttpHumidity.prototype = {
+HttpTemperature.prototype = {
 
    httpRequest: function (url, body, method, username, password, sendimmediately, callback) {
       cons
@@ -46,15 +46,15 @@ HttpHumidity.prototype = {
          this.log('HTTP get state function succeeded!');
          var info = JSON.parse(res.body);
 
-         this.humidityService.setCharacteristic(
-            Characteristic.CurrentRelativeHumidity,
-            info.humidity
+         this.temperatureService.setCharacteristic(
+            Characteristic.CurrentTemperature,
+            info.temperature
          );
          this.log(info);
 
-         this.humidity = info.humidity;
+         this.temperature = info.temperature;
 
-         callback(null, this.humidity);
+         callback(null, this.temperature);
       }
    },
 
@@ -70,11 +70,11 @@ HttpHumidity.prototype = {
       .setCharacteristic(Characteristic.Model, this.model)
       .setCharacteristic(Characteristic.SerialNumber, this.serial);
 
-      this.humidityService = new Service.HumiditySensor(this.name);
-      this.humidityService
-         .getCharacteristic(Characteristic.CurrentRelativeHumidity)
+      this.temperatureService = new Service.TemperatureSensor(this.name);
+      this.temperatureService
+         .getCharacteristic(Characteristic.CurrentTemperature)
          .on('get', this.getState.bind(this));
 
-      return [this.informationService, this.humidityService];
+      return [this.informationService, this.temperatureService];
    }
 };

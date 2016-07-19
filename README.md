@@ -1,13 +1,13 @@
-# homebridge-http-humidity
+# homebridge-http-temperature
 
 Supports https devices on HomeBridge Platform.
 This is a simplified version of the https://github.com/lucacri/homebridge-http-temperature-humidity plugin.
-This version only supports humidity sensors, not temperature.
+This version only supports temperature sensors, not humidity.
 
 # Installation (TO BE UPDATED)
 
 1. Install homebridge using: npm install -g homebridge
-2. Install this plugin using: npm install -g homebridge-httptemperaturehumidity
+2. Install this plugin using: npm install -g homebridge-http-temperature
 3. Update your configuration file. See sample-config.json in this repository for a sample.
 
 # Configuration (TO BE UPDATED)
@@ -16,16 +16,14 @@ This version only supports humidity sensors, not temperature.
 Configuration sample file:
 
  ```
-"accessories": [
-        "accessories": [
-        {
-            "accessory": "HttpTemphum",
-            "name": "Living Room Weather",
-            "url": "http://192.168.1.210/weather",
-            "sendimmediately": "",
-            "http_method": "GET"
-        }
-    ]
+ "accessories": [
+     {
+         "accessory": "HttpTemperatureSensor",
+         "name": "Outside Temperature",
+         "url": "http://192.168.1.210/temperature?format=json",
+         "http_method": "GET"
+     }
+ ]
 
 ```
 
