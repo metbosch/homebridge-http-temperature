@@ -20,6 +20,6 @@
     "url": "git://github.com/metbosch/homebridge-http-temperature.git"
   },
   "dependencies": {
-    "sync-request": "^2.1.0"
+    "request": "^2.5.0"
   }
 }

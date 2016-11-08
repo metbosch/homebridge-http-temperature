@@ -1,8 +1,9 @@
 var Service, Characteristic;
-var request = require('sync-request');
+var request = require('request');
 
-const MIN_TEMPERATURE = -100,
-      MAX_TEMPERATURE = 100;
+const DEF_MIN_TEMPERATURE = -100,
+      DEF_MAX_TEMPERATURE = 100,
+      DEF_TIMEOUT = 5000;
 
 module.exports = function (homebridge) {
    Service = homebridge.hap.Service;
@@ -21,49 +22,38 @@ function HttpTemperature(log, config) {
    this.manufacturer = config["manufacturer"] || "@metbosch manufacturer";
    this.model = config["model"] || "Model not available";
    this.serial = config["serial"] || "Non-defined serial";
+   this.timeout = config["timeout"] || DEF_TIMEOUT;
+   this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
+   this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
 }
 
 HttpTemperature.prototype = {
 
-   httpRequest: function (url, body, method, username, password, sendimmediately, callback) {
-      cons
-      request({
-         url: url,
-         body: body,
-         method: method,
-         rejectUnauthorized: false
-      },
-      function (error, response, body) {
-         callback(error, response, body)
-      })
-   },
-
    getState: function (callback) {
-      var body;
-
-      var res = request(this.http_method, this.url, {});
-      if(res.statusCode > 400){
-         this.log('HTTP get state function failed');
-         callback(error);
-      } else {
-         this.log('HTTP get state function succeeded!');
-         var info = JSON.parse(res.body);
-
-         this.temperatureService.setCharacteristic(
-            Characteristic.CurrentTemperature,
-            info.temperature
-         );
-         this.log(info);
-
-         this.temperature = info.temperature;
-
-         callback(null, this.temperature);
-      }
-   },
-
-   identify: function (callback) {
-      this.log("Identify requested!");
-      callback(); // success
+      var ops = {
+         uri:    this.url,
+         method: this.http_method,
+         timeout: this.timeout
+      };
+      this.log('Requesting temperature on "' + ops.uri + '", method ' + ops.method);
+      request(ops, (error, res, body) => {
+         var value = null;
+         if (error) {
+            this.log('HTTP bad response (' + ops.uri + '): ' + error.message);
+         } else {
+            try {
+               value = JSON.parse(body).temperature;
+               if (value < this.minTemperature || value > this.maxTemperature || isNaN(value)) {
+                  throw "Invalid value received";
+               }
+               this.log('HTTP successful response: ' + body);
+            } catch (parseErr) {
+               this.log('Error processing received information: ' + parseErr.message);
+               error = parseErr;
+            }
+         }
+         callback(error, value);
+      });
    },
 
    getServices: function () {
@@ -78,8 +68,8 @@ HttpTemperature.prototype = {
          .getCharacteristic(Characteristic.CurrentTemperature)
          .on('get', this.getState.bind(this))
          .setProps({
-             minValue: MIN_TEMPERATURE,
-             maxValue: MAX_TEMPERATURE
+             minValue: this.minTemperature,
+             maxValue: this.maxTemperature
          });
       return [this.informationService, this.temperatureService];
    }
