@@ -21,7 +21,8 @@ Configuration sample file:
          "accessory": "HttpTemperature",
          "name": "Outside Temperature",
          "url": "http://192.168.1.210/temperature?format=json",
-         "http_method": "GET"
+         "http_method": "GET",
+         "field_name": "temperature"
      }
  ]
 

@@ -22,6 +22,7 @@ function HttpTemperature(log, config) {
    this.manufacturer = config["manufacturer"] || "@metbosch manufacturer";
    this.model = config["model"] || "Model not available";
    this.serial = config["serial"] || "Non-defined serial";
+   this.fieldName = config["field_name"] || "temperature";
    this.timeout = config["timeout"] || DEF_TIMEOUT;
    this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
    this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
@@ -42,11 +43,11 @@ HttpTemperature.prototype = {
             this.log('HTTP bad response (' + ops.uri + '): ' + error.message);
          } else {
             try {
-               value = JSON.parse(body).temperature;
+               value = Number(JSON.parse(body)[this.fieldName]);
                if (value < this.minTemperature || value > this.maxTemperature || isNaN(value)) {
-                  throw "Invalid value received";
+                  throw new Error("Invalid value received");
                }
-               this.log('HTTP successful response: ' + body);
+               this.log('HTTP successful response: ' + value);
             } catch (parseErr) {
                this.log('Error processing received information: ' + parseErr.message);
                error = parseErr;
