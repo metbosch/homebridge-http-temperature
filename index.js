@@ -26,17 +26,24 @@ function HttpTemperature(log, config) {
    this.timeout = config["timeout"] || DEF_TIMEOUT;
    this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
    this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
+   this.auth = config["auth"];
 }
 
 HttpTemperature.prototype = {
 
    getState: function (callback) {
+      this.log('Requesting temperature on "' + ops.uri + '", method ' + ops.method);
       var ops = {
          uri:    this.url,
          method: this.http_method,
          timeout: this.timeout
       };
-      this.log('Requesting temperature on "' + ops.uri + '", method ' + ops.method);
+      if (this.auth) {
+         ops.auth = {
+            user: this.auth.user,
+            pass: this.auth.pass
+         };
+      }
       request(ops, (error, res, body) => {
          var value = null;
          if (error) {
