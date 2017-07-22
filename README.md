@@ -28,12 +28,15 @@ Configuration sample file:
 
 ```
 
-
-The defined endpoint will return a json looking like this
+The defined endpoint will return a json looking like this:
 ```
 {
 	"temperature": 25.8
 }
+```
+Alternatively, if the `field_name` contains an empty string (`"field_name": ""`), the expected response is directly the current temperature value:
+```
+25.8
 ```
 
 

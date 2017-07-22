@@ -43,7 +43,8 @@ HttpTemperature.prototype = {
             this.log('HTTP bad response (' + ops.uri + '): ' + error.message);
          } else {
             try {
-               value = Number(JSON.parse(body)[this.fieldName]);
+               value = this.fieldName === '' ? body : JSON.parse(body)[this.fieldName];
+               value = Number(value);
                if (value < this.minTemperature || value > this.maxTemperature || isNaN(value)) {
                   throw new Error("Invalid value received");
                }
