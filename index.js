@@ -32,12 +32,12 @@ function HttpTemperature(log, config) {
 HttpTemperature.prototype = {
 
    getState: function (callback) {
-      this.log('Requesting temperature on "' + ops.uri + '", method ' + ops.method);
       var ops = {
          uri:    this.url,
          method: this.http_method,
          timeout: this.timeout
       };
+      this.log('Requesting temperature on "' + ops.uri + '", method ' + ops.method);
       if (this.auth) {
          ops.auth = {
             user: this.auth.user,
