@@ -27,6 +27,9 @@ function HttpTemperature(log, config) {
    this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
    this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
    this.auth = config["auth"];
+   this.refresh = config['refresh'] || 300;//5 minutes polling
+      
+   setInterval(this.polling.bind(this), this.refresh * 1000);
 }
 
 HttpTemperature.prototype = {
@@ -63,6 +66,12 @@ HttpTemperature.prototype = {
          }
          callback(error, value);
       });
+   },
+      
+  polling: function(){
+      console.log("Polling Tempearture");
+      this.temperatureService
+         .getCharacteristic(Characteristic.CurrentTemperature).getValue();
    },
 
    getServices: function () {
