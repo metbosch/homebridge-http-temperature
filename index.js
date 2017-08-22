@@ -27,7 +27,7 @@ function HttpTemperature(log, config) {
    this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
    this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
    this.auth = config["auth"];
-   this.refresh = config["refresh"] || 300;//5 minutes polling
+   this.refresh = config['refresh'] || 300;//5 minutes polling
       
    setInterval(this.polling.bind(this), this.refresh * 1000);
 }
@@ -53,10 +53,8 @@ HttpTemperature.prototype = {
             this.log('HTTP bad response (' + ops.uri + '): ' + error.message);
          } else {
             try {
-               var value = JSON.parse(body);
-               var temperature = value.values[1][1].toString();       
-               temperaturesub = temperature.substr(0, temperature.length-2);
-               value = (temperaturesub - 32) * (5/9);
+               value = this.fieldName === '' ? body : JSON.parse(body)[this.fieldName];
+               value = Number(value);
                if (value < this.minTemperature || value > this.maxTemperature || isNaN(value)) {
                   throw new Error("Invalid value received");
                }
