@@ -25,7 +25,7 @@ The available fields in the config.json file are:
  - `min_temp` [Optional] Min. temperature that can be returned by the endpoint (Default: -100).
  - `max_temp` [Optional] Max. temperature that can be returned by the endpoint (Default: 100).
  - `auth` [Optional] JSON with `user` and `pass` fields used to authenticate the request into the device.
- - `refresh` [Optional] Refresh Status timing. Default 5 minutes (Default: 300). 
+ - `refresh` [Optional] Refresh Status timing. Default is not enabled (Default: 0). 
 
 Example:
 
@@ -37,6 +37,7 @@ Example:
          "url": "http://192.168.1.210/temperature?format=json",
          "http_method": "GET",
          "field_name": "temperature",
+         "refresh": 60,
          "auth": {
              "user": "test",
              "pass": "1234"
