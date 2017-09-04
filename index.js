@@ -82,7 +82,6 @@ HttpTemperature.prototype = {
             this.waiting_response = false;
          });
       }).then((value) => {
-         this.log("NOTE_1: value is " + value);
          this.temperatureService
             .getCharacteristic(Characteristic.CurrentTemperature).updateValue(value, null);
          return value;
@@ -96,7 +95,6 @@ HttpTemperature.prototype = {
       this.log('Call to getState: waiting_response is "' + this.waiting_response + '"' );
       this.updateState(); //This sets the promise in last_value
       this.last_value.then((value) => {
-         this.log("NOTE_2: value is " + value);
          callback(null, value);
          return value;
       }, (error) => {
