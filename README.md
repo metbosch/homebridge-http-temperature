@@ -25,6 +25,7 @@ The available fields in the config.json file are:
  - `min_temp` [Optional] Min. temperature that can be returned by the endpoint (Default: -100).
  - `max_temp` [Optional] Max. temperature that can be returned by the endpoint (Default: 100).
  - `auth` [Optional] JSON with `user` and `pass` fields used to authenticate the request into the device.
+ - `update_interval` [Optional] If not zero, the field defines the polling period in miliseconds for the sensor state (Default is 120000ms). When the value is zero, the state is only updated when homebridge requests the current value.
 
 
 Example:
