@@ -66,7 +66,8 @@ HttpTemperature.prototype = {
                   value = this.fieldName === '' ? body : JSON.parse(body)[this.fieldName];
                   value = Number(value);
                   if (isNaN(value)) {
-                     throw new Error('Received value is not a number: "' + value + '"');
+                     var prevValue = this.fieldName === '' ? body : JSON.parse(body)[this.fieldName];
+                     throw new Error('Received value is not a number: "' + value + '" ("' + prevValue + '")');
                   } else if (value < this.minTemperature || value > this.maxTemperature) {
                      var msg = 'Received value is out of bounds: "' + value + '". min=' + this.minTemperature +
                                ', max= ' + this.maxTemperature;
