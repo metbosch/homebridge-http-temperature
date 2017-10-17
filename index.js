@@ -23,7 +23,7 @@ function HttpTemperature(log, config) {
    this.manufacturer = config["manufacturer"] || "@metbosch manufacturer";
    this.model = config["model"] || "Model not available";
    this.serial = config["serial"] || "Non-defined serial";
-   this.fieldName = config["field_name"] || "temperature";
+   this.fieldName = ( config["field_name"] != null ? config["field_name"] : "temperature" );
    this.timeout = config["timeout"] || DEF_TIMEOUT;
    this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
    this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
