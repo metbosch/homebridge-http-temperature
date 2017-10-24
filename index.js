@@ -23,7 +23,7 @@ function HttpTemperature(log, config) {
    this.manufacturer = config["manufacturer"] || "@metbosch manufacturer";
    this.model = config["model"] || "Model not available";
    this.serial = config["serial"] || "Non-defined serial";
-   this.fieldName = config["field_name"] || "temperature";
+   this.fieldName = ( config["field_name"] != null ? config["field_name"] : "temperature" );
    this.timeout = config["timeout"] || DEF_TIMEOUT;
    this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
    this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
@@ -65,8 +65,12 @@ HttpTemperature.prototype = {
                try {
                   value = this.fieldName === '' ? body : JSON.parse(body)[this.fieldName];
                   value = Number(value);
-                  if (value < this.minTemperature || value > this.maxTemperature || isNaN(value)) {
-                     throw new Error("Invalid value received");
+                  if (isNaN(value)) {
+                     throw new Error('Received value is not a number: "' + value + '" ("' + body.substring(0, 100) + '")');
+                  } else if (value < this.minTemperature || value > this.maxTemperature) {
+                     var msg = 'Received value is out of bounds: "' + value + '". min=' + this.minTemperature +
+                               ', max= ' + this.maxTemperature;
+                     throw new Error(msg);
                   }
                   this.log('HTTP successful response: ' + value);
                } catch (parseErr) {
