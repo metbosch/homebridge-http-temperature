@@ -1,7 +1,7 @@
 {
   "name": "homebridge-http-temperature",
-  "version": "0.5.0",
-  "description": "https plugin for homebridge",
+  "version": "0.6.0",
+  "description": "http/s plugin for homebridge supporting temperature sensors",
   "license": "ISC",
   "keywords": [
     "homebridge-plugin",
