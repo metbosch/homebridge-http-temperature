@@ -1,8 +1,11 @@
 var Service, Characteristic;
 var request = require('request');
 
+const CELSIUS_UNITS = 'C',
+      FAHRENHEIT_UNITS = 'F';
 const DEF_MIN_TEMPERATURE = -100,
       DEF_MAX_TEMPERATURE = 100,
+      DEF_UNITS = CELSIUS_UNITS,
       DEF_TIMEOUT = 5000,
       DEF_INTERVAL = 120000; //120s
 
@@ -16,7 +19,6 @@ module.exports = function (homebridge) {
 function HttpTemperature(log, config) {
    this.log = log;
 
-   // url info
    this.url = config["url"];
    this.http_method = config["http_method"] || "GET";
    this.name = config["name"];
@@ -27,8 +29,16 @@ function HttpTemperature(log, config) {
    this.timeout = config["timeout"] || DEF_TIMEOUT;
    this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
    this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
+   this.units = config["units"] || DEF_UNITS;
    this.auth = config["auth"];
    this.update_interval = Number( config["update_interval"] || DEF_INTERVAL );
+
+   //Check if units field is valid
+   this.units = this.units.toUpperCase()
+   if (this.units !== CELSIUS_UNITS && this.units !== FAHRENHEIT_UNITS) {
+      this.log('Bad temperature units : "' + this.units + '" (assuming Celsius).');
+      this.units = CELSIUS_UNITS;
+   }
 
    // Internal variables
    this.last_value = null;
@@ -73,15 +83,19 @@ HttpTemperature.prototype = {
                      throw new Error(msg);
                   }
                   this.log('HTTP successful response: ' + value);
+                  if (this.units === FAHRENHEIT_UNITS) {
+                     value = (value - 32)/1.8;
+                     this.log('Converted Fahrenheit temperature to celsius: ' + value);
+                  }
                } catch (parseErr) {
                   this.log('Error processing received information: ' + parseErr.message);
                   error = parseErr;
                }
             }
             if (!error) {
-                resolve(value);
+               resolve(value);
             } else {
-                reject(error);
+               reject(error);
             }
             this.waiting_response = false;
          });
@@ -105,13 +119,6 @@ HttpTemperature.prototype = {
          callback(error, null);
          return error;
       });
-   },
-
-   getTemperatureUnits: function (callback) {
-      // 1 = F and 0 = C
-      var value = 0;
-      this.log ("Call to getTemperature Units, response: " + value);
-      callback (null, value);
    },
 
    getServices: function () {
