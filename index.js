@@ -73,7 +73,7 @@ HttpTemperature.prototype = {
                this.log('HTTP bad response (' + ops.uri + '): ' + error.message);
             } else {
                try {
-                  value = this.fieldName === '' ? body : JSON.parse(body)[this.fieldName];
+                  value = this.fieldName === '' ? body : this.getFromObject(JSON.parse(body), this.fieldName, '');
                   value = Number(value);
                   if (isNaN(value)) {
                      throw new Error('Received value is not a number: "' + value + '" ("' + body.substring(0, 100) + '")');
@@ -142,5 +142,21 @@ HttpTemperature.prototype = {
       }
 
       return [this.informationService, this.temperatureService];
+   },
+
+   getFromObject: function (obj, path, def) {
+      if (!path) return path
+
+      const fullPath = path
+        .replace(/\[/g, '.')
+        .replace(/]/g, '')
+        .split('.')
+        .filter(Boolean)
+
+      return fullPath.every(everyFunc) ? obj : def
+
+      function everyFunc (step) {
+        return !(step && (obj = obj[step]) === undefined)
+      }
    }
 };
