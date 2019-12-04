@@ -145,18 +145,20 @@ HttpTemperature.prototype = {
    },
 
    getFromObject: function (obj, path, def) {
-      if (!path) return path
+      if (!path) return obj;
 
       const fullPath = path
         .replace(/\[/g, '.')
         .replace(/]/g, '')
         .split('.')
-        .filter(Boolean)
+        .filter(Boolean);
 
-      return fullPath.every(everyFunc) ? obj : def
+      // Iterate all path elements to get the leaf, or untill the key is not found in the JSON
+      return fullPath.every(everyFunc) ? obj : def;
 
       function everyFunc (step) {
-        return !(step && (obj = obj[step]) === undefined)
+        // Dynamically update the obj variable for the next call
+        return !(step && (obj = obj[step]) === undefined);
       }
    }
 };
