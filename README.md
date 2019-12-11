@@ -20,7 +20,7 @@ The available fields in the config.json file are:
  - `manufacturer` [Optional] Additional information for the accessory.
  - `model` [Optional] Additional information for the accessory.
  - `serial` [Optional] Additional information for the accessory.
- - `field_name` [Optional] Field that will be used from the JSON response of the endpoint. Alternatively, if the `field_name` contains an empty string (`"field_name": ""`), the expected response is directly the current temperature value (Default: temperature).
+ - `field_name` [Optional] Field path that will be used from the JSON response of the endpoint. Alternatively, if the `field_name` contains an empty string (`"field_name": ""`), the expected response is directly the current temperature value (Default: temperature).
  - `timeout` [Optional] Waiting time for the endpoint response before fail (Default: 5000ms).
  - `min_temp` [Optional] Min. temperature that can be returned by the endpoint (Default: -100).
  - `max_temp` [Optional] Max. temperature that can be returned by the endpoint (Default: 100).
@@ -54,3 +54,19 @@ The defined endpoint will return a json looking like this:
 	"temperature": 25.8
 }
 ```
+
+If the defined endpoint returns something more complicated like:
+```
+[
+  {
+    "temp1": 31.5,
+    "temp2": 24.1
+  },
+  {
+    "temp1": 27.8,
+    "temp2": 29.3
+  }
+]
+```
+
+You can define the `field_name` as something like `[0].temp2`
