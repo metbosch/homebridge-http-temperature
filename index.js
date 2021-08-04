@@ -1,5 +1,8 @@
-var Service, Characteristic;
+var Service, Characteristic, FakeGatoHistoryService;
 var request = require('request');
+var fs = require('fs');
+const moment = require('moment');
+var Logger = require("mcuiot-logger").logger;
 
 const CELSIUS_UNITS = 'C',
       FAHRENHEIT_UNITS = 'F';
@@ -12,6 +15,7 @@ const DEF_MIN_TEMPERATURE = -100,
 module.exports = function (homebridge) {
    Service = homebridge.hap.Service;
    Characteristic = homebridge.hap.Characteristic;
+   FakeGatoHistoryService = require('fakegato-history')(homebridge);
    homebridge.registerAccessory("homebridge-http-temperature", "HttpTemperature", HttpTemperature);
 }
 
@@ -25,13 +29,14 @@ function HttpTemperature(log, config) {
    this.manufacturer = config["manufacturer"] || "@metbosch manufacturer";
    this.model = config["model"] || "Model not available";
    this.serial = config["serial"] || "Non-defined serial";
-   this.fieldName = ( config["field_name"] != null ? config["field_name"] : "temperature" );
+   //this.fieldName = ( config["field_name"] != null ? config["field_name"] : "temperature" );
    this.timeout = config["timeout"] || DEF_TIMEOUT;
    this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
    this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
    this.units = config["units"] || DEF_UNITS;
    this.auth = config["auth"];
    this.update_interval = Number( config["update_interval"] || DEF_INTERVAL );
+   this.storage = config['storage'] || "fs";
 
    //Check if units field is valid
    this.units = this.units.toUpperCase()
@@ -43,6 +48,11 @@ function HttpTemperature(log, config) {
    // Internal variables
    this.last_value = null;
    this.waiting_response = false;
+
+   this.log_event_counter = 59;
+  if (this.spreadsheetId) {
+    this.logger = new Logger(this.spreadsheetId);
+  }
 }
 
 HttpTemperature.prototype = {
@@ -73,7 +83,7 @@ HttpTemperature.prototype = {
                this.log('HTTP bad response (' + ops.uri + '): ' + error.message);
             } else {
                try {
-                  value = this.fieldName === '' ? body : this.getFromObject(JSON.parse(body), this.fieldName, '');
+                  value = body;//this.fieldName === '' ? body : this.getFromObject(JSON.parse(body), this.fieldName, '');
                   value = Number(value);
                   if (isNaN(value)) {
                      throw new Error('Received value is not a number: "' + value + '" ("' + body.substring(0, 100) + '")');
@@ -101,7 +111,8 @@ HttpTemperature.prototype = {
          });
       }).then((value) => {
          this.temperatureService
-            .getCharacteristic(Characteristic.CurrentTemperature).updateValue(value, null);
+            .getCharacteristic(Characteristic.CurrentTemperature).
+            updateValue(value, null);
          return value;
       }, (error) => {
          //For now, only to avoid the NodeJS warning about uncatched rejected promises
@@ -113,6 +124,17 @@ HttpTemperature.prototype = {
       this.log('Call to getState: waiting_response is "' + this.waiting_response + '"' );
       this.updateState(); //This sets the promise in last_value
       this.last_value.then((value) => {
+         this.log_event_counter = this.log_event_counter + 1;
+         if (this.log_event_counter > 59) {
+           if (this.spreadsheetId) {
+             this.logger.storeDHT(this.name, 0, roundInt(value), 0);
+           }
+           this.log_event_counter = 0;
+         }
+         this.loggingService.addEntry({
+            time: moment().unix(),
+            temp: roundInt(value)
+          });
          callback(null, value);
          return value;
       }, (error) => {
@@ -137,11 +159,18 @@ HttpTemperature.prototype = {
              maxValue: this.maxTemperature
          });
 
+      this.temperatureService.log = this.log;
+      this.loggingService = new FakeGatoHistoryService("weather", this.temperatureService, {
+         //size:4600,        // optional - if you still need to specify the length
+         storage:'fs',
+         minutes: ((this.pollInterval/1000) * 10 / 60)
+      });
+      
       if (this.update_interval > 0) {
          this.timer = setInterval(this.updateState.bind(this), this.update_interval);
       }
 
-      return [this.informationService, this.temperatureService];
+      return [this.informationService, this.temperatureService, this.loggingService];
    },
 
    getFromObject: function (obj, path, def) {
@@ -162,3 +191,7 @@ HttpTemperature.prototype = {
       }
    }
 };
+
+function roundInt(string) {
+   return Math.round(parseFloat(string) * 10) / 10;
+ }

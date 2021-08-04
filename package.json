@@ -20,6 +20,9 @@
     "url": "git://github.com/metbosch/homebridge-http-temperature.git"
   },
   "dependencies": {
-    "request": "^2.5.0"
+    "request": "^2.5.0",
+    "mcuiot-logger": ">0.0.6",
+    "moment": ">2.20.1",
+    "fakegato-history": "^0.6.1"
   }
 }
