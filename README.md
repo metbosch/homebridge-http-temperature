@@ -5,6 +5,8 @@ This version only supports temperature sensors returning a JSON with the data or
 
 This plug-in acts as an interface between a web endpoint and homebridge only. You will still need some dedicated hardware to expose the web endpoints with the temperature information. In my case, I used an Arduino board with Wifi capabilities.
 
+Supports [EveApp on iOS](https://apps.apple.com/us/app/eve-for-homekit/id917695792)
+
 # Installation
 
 1. Install homebridge using: ```npm install -g homebridge```
