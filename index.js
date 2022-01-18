@@ -32,6 +32,7 @@ function HttpTemperature(log, config) {
    this.units = config["units"] || DEF_UNITS;
    this.auth = config["auth"];
    this.update_interval = Number( config["update_interval"] || DEF_INTERVAL );
+   this.debug = config["debug"] || false;
 
    //Check if units field is valid
    this.units = this.units.toUpperCase()
@@ -47,10 +48,16 @@ function HttpTemperature(log, config) {
 
 HttpTemperature.prototype = {
 
+   logDebug: function (str) {
+      if (this.debug) {
+         this.log(str)
+      }
+   },
+
    updateState: function () {
       //Ensure previous call finished
       if (this.waiting_response) {
-         this.log('Avoid updateState as previous response does not arrived yet');
+         this.logDebug('Avoid updateState as previous response does not arrived yet');
          return;
       }
       this.waiting_response = true;
@@ -60,7 +67,7 @@ HttpTemperature.prototype = {
             method: this.http_method,
             timeout: this.timeout
          };
-         this.log('Requesting temperature on "' + ops.uri + '", method ' + ops.method);
+         this.logDebug('Requesting temperature on "' + ops.uri + '", method ' + ops.method);
          if (this.auth) {
             ops.auth = {
                user: this.auth.user,
@@ -82,13 +89,13 @@ HttpTemperature.prototype = {
                                ', max= ' + this.maxTemperature;
                      throw new Error(msg);
                   }
-                  this.log('HTTP successful response: ' + value);
+                  this.logDebug('HTTP successful response: ' + value);
                   if (this.units === FAHRENHEIT_UNITS) {
                      value = (value - 32)/1.8;
-                     this.log('Converted Fahrenheit temperature to celsius: ' + value);
+                     this.logDebug('Converted Fahrenheit temperature to celsius: ' + value);
                   }
                } catch (parseErr) {
-                  this.log('Error processing received information: ' + parseErr.message);
+                  this.logDebug('Error processing received information: ' + parseErr.message);
                   error = parseErr;
                }
             }
@@ -110,7 +117,7 @@ HttpTemperature.prototype = {
    },
 
    getState: function (callback) {
-      this.log('Call to getState: waiting_response is "' + this.waiting_response + '"' );
+      this.logDebug('Call to getState: waiting_response is "' + this.waiting_response + '"' );
       this.updateState(); //This sets the promise in last_value
       this.last_value.then((value) => {
          callback(null, value);
