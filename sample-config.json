@@ -13,10 +13,11 @@
     "accessories": [
         {
             "accessory": "HttpTemperature",
-            "name": "Outside Temperature",
-            "url": "http://192.168.1.210/temperature?format=json",
+            "name": "Global Temperature",
+            "url": "https://temperature.global/api.php",
             "http_method": "GET",
-            "field_name": "temperature"
+            "field_name": "temp",
+            "units": "F"
         }
     ]
 }
