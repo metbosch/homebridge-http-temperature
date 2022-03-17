@@ -25,7 +25,8 @@ The available fields in the config.json file are:
  - `min_temp` [Optional] Min. temperature that can be returned by the endpoint (Default: -100).
  - `max_temp` [Optional] Max. temperature that can be returned by the endpoint (Default: 130).
  - `units` [Optional] Temperature units of the value returned by the endpoint. Supported values are: `"C"` for Celsius and `"F"` for Fahrenheit (Default: 'C').
- - `auth` [Optional] JSON with `user` and `pass` fields used to authenticate the request into the device.
+ - `auth` [Optional] Object with `user` and `pass` fields used to authenticate the request into the device.
+ - `http_headers` [Optional] Object with headers for http requests. See [http.request documentation](https://nodejs.org/api/http.html#httprequesturl-options-callback) for more information.
  - `update_interval` [Optional] If not zero, the field defines the polling period in milliseconds for the sensor state (Default is 120000ms). When the value is zero, the state is only updated when homebridge requests the current value.
  - `debug` [Optional] Enable/disable debug logs (Default: false).
 

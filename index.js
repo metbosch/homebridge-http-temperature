@@ -43,6 +43,11 @@ function HttpTemperature(log, config) {
       this.log('Ignoring invalid auth options. "user" and "pass" must be provided');
    }
 
+   //Check headers option
+   if (config.http_headers) {
+      this.request_opts.headers = config.http_headers;
+   }
+
    //Check if units field is valid
    this.units = this.units.toUpperCase()
    if (this.units !== CELSIUS_UNITS && this.units !== FAHRENHEIT_UNITS) {
