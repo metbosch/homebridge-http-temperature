@@ -18,8 +18,5 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/metbosch/homebridge-http-temperature.git"
-  },
-  "dependencies": {
-    "request": "^2.5.0"
   }
 }

@@ -1,5 +1,5 @@
 var Service, Characteristic;
-var request = require('request');
+import request from "http";
 
 const CELSIUS_UNITS = 'C',
       FAHRENHEIT_UNITS = 'F';
@@ -20,13 +20,15 @@ function HttpTemperature(log, config) {
    this.log = log;
 
    this.url = config["url"];
-   this.http_method = config["http_method"] || "GET";
+   this.request_opts = {
+      method: config.http_method || "GET",
+      timeout: config.timeout || DEF_TIMEOUT,
+   };
    this.name = config["name"];
    this.manufacturer = config["manufacturer"] || "@metbosch manufacturer";
    this.model = config["model"] || "Model not available";
    this.serial = config["serial"] || "Non-defined serial";
    this.fieldName = ( config["field_name"] != null ? config["field_name"] : "temperature" );
-   this.timeout = config["timeout"] || DEF_TIMEOUT;
    this.minTemperature = config["min_temp"] || DEF_MIN_TEMPERATURE;
    this.maxTemperature = config["max_temp"] || DEF_MAX_TEMPERATURE;
    this.units = config["units"] || DEF_UNITS;
@@ -34,10 +36,17 @@ function HttpTemperature(log, config) {
    this.update_interval = Number( config["update_interval"] || DEF_INTERVAL );
    this.debug = config["debug"] || false;
 
+   //Check auth option
+   if (config.auth && config.auth.user !== undefined && config.auth.pass !== undefined) {
+      this.request_opts.auth = config.auth.user + ':' + config.auth.pass;
+   } else if (config.auth) {
+      this.log('Ignoring invalid auth options. "user" and "pass" must be provided');
+   }
+
    //Check if units field is valid
    this.units = this.units.toUpperCase()
    if (this.units !== CELSIUS_UNITS && this.units !== FAHRENHEIT_UNITS) {
-      this.log('Bad temperature units : "' + this.units + '" (assuming Celsius).');
+      this.log('Bad temperature units : "' + this.units + '" (assuming Celsius)');
       this.units = CELSIUS_UNITS;
    }
 
@@ -62,23 +71,14 @@ HttpTemperature.prototype = {
       }
       this.waiting_response = true;
       this.last_value = new Promise((resolve, reject) => {
-         var ops = {
-            uri:    this.url,
-            method: this.http_method,
-            timeout: this.timeout
-         };
-         this.logDebug('Requesting temperature on "' + ops.uri + '", method ' + ops.method);
-         if (this.auth) {
-            ops.auth = {
-               user: this.auth.user,
-               pass: this.auth.pass
-            };
-         }
-         request(ops, (error, res, body) => {
-            var value = null;
-            if (error) {
-               this.log('HTTP bad response (' + ops.uri + '): ' + error.message);
-            } else {
+         this.logDebug('Requesting temperature on "' + this.url);
+         request(this.url, this.request_opts, (res) => {
+            let body = '';
+            res.on('data', (chunk) => {
+               body += chunk;
+            });
+            res.on('end', () => {
+               let value = null;
                try {
                   value = this.fieldName === '' ? body : this.getFromObject(JSON.parse(body), this.fieldName, '');
                   value = Number(value);
@@ -96,15 +96,14 @@ HttpTemperature.prototype = {
                   }
                } catch (parseErr) {
                   this.logDebug('Error processing received information: ' + parseErr.message);
+                  reject(error);
                   error = parseErr;
                }
-            }
-            if (!error) {
                resolve(value);
-            } else {
-               reject(error);
-            }
-            this.waiting_response = false;
+               this.waiting_response = false;
+            });
+         }).on('error', (error) => {
+            this.log('HTTP bad response: ' + error.message);
          });
       }).then((value) => {
          this.temperatureService
