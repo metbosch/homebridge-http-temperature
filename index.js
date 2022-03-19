@@ -88,10 +88,10 @@ HttpTemperature.prototype = {
             res.on('end', () => {
                let value = null;
                try {
-                  value = this.fieldName === '' ? body : this.getFromObject(JSON.parse(body), this.fieldName, '');
-                  value = Number(value);
-                  if (isNaN(value)) {
-                     throw new Error('Received value is not a number: "' + value + '" ("' + body.substring(0, 100) + '")');
+                  const value_str = this.fieldName === '' ? body : this.getFromObject(JSON.parse(body), this.fieldName, '');
+                  value = Number(value_str);
+                  if (value_str === '' || isNaN(value)) {
+                     throw new Error('Received value is not a number: "' + value_str + '" ("' + body.substring(0, 100) + '")');
                   } else if (value < this.minTemperature || value > this.maxTemperature) {
                      var msg = 'Received value is out of bounds: "' + value + '". min=' + this.minTemperature +
                                ', max= ' + this.maxTemperature;
@@ -102,23 +102,24 @@ HttpTemperature.prototype = {
                      value = (value - 32)/1.8;
                      this.logDebug('Converted Fahrenheit temperature to celsius: ' + value);
                   }
-               } catch (parseErr) {
-                  this.logDebug('Error processing received information: ' + parseErr.message);
+               } catch (error) {
                   reject(error);
-                  error = parseErr;
                }
                resolve(value);
-               this.waiting_response = false;
             });
-         }).on('error', (error) => {
-            this.log('HTTP bad response: ' + error.message);
-         }).end();
+         }).on('error', reject).end();
       });
       this.last_value.then((value) => {
          this.temperatureService
-            .getCharacteristic(Characteristic.CurrentTemperature).updateValue(value, null);
+            .getCharacteristic(Characteristic.CurrentTemperature).updateValue(value);
+         this.temperatureService
+            .getCharacteristic(Characteristic.StatusFault).updateValue(Characteristic.StatusFault.NO_FAULT);
+         this.waiting_response = false;
       }).catch((error) => {
-         //TODO call temperatureService to set unavailable (issue 20)
+         this.temperatureService
+            .getCharacteristic(Characteristic.StatusFault).updateValue(Characteristic.StatusFault.GENERAL_FAULT);
+         this.log('Error updating state: ' + error.message);
+         this.waiting_response = false;
       });
    },
 
