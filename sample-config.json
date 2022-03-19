@@ -15,7 +15,6 @@
             "accessory": "HttpTemperature",
             "name": "Global Temperature",
             "url": "https://temperature.global/api.php",
-            "http_method": "GET",
             "field_name": "temp",
             "units": "F"
         }
