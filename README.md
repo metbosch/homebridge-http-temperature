@@ -45,7 +45,7 @@ For a ready-to-go example, see the `sample-config.json` file in the git reposito
 
 ### Minimal HTTP
 
-```
+```json
 "accessories": [
   {
     "accessory": "HttpTemperature",
@@ -57,7 +57,7 @@ For a ready-to-go example, see the `sample-config.json` file in the git reposito
 
 ### HTTPS + Auth + JSON-field
 
-```
+```json
 "accessories": [
   {
     "accessory": "HttpTemperature",
@@ -65,8 +65,8 @@ For a ready-to-go example, see the `sample-config.json` file in the git reposito
     "url": "https://IP/path/to/endpoint",
     "field_name": "temperature",
     "auth": {
-        "user": "test",
-        "pass": "1234"
+      "user": "test",
+       "pass": "1234"
     }
   }
 ]
@@ -75,16 +75,16 @@ For a ready-to-go example, see the `sample-config.json` file in the git reposito
 With this configuration, the endpoint should return a JSON with (at least) a `temperature` field.
 It should look like:
 
-```
+```json
 {
-	"temperature": 25.8
+  "temperature": 25.8
 }
 ```
 
 ### Advanced JSON parsing
 
 If the defined endpoint returns something more complicated like:
-```
+```json
 {
   "time": "YYYY-MM-DD HH:MM:SS",
   "device_info": {
@@ -105,7 +105,7 @@ If the defined endpoint returns something more complicated like:
 
 The configuration to get `temp2` from 1st set of values would look like:
 
-```
+```json
 "accessories": [
   {
     "accessory": "HttpTemperature",
