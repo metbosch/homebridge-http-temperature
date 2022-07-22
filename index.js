@@ -89,6 +89,7 @@ HttpTemperature.prototype = {
                let value = null;
                try {
                   const value_str = this.fieldName === '' ? body : this.getFromObject(JSON.parse(body), this.fieldName, '');
+                  value_str = value_str.replace(/[^0-9.]/g, '');
                   value = Number(value_str);
                   if (value_str === '' || isNaN(value)) {
                      throw new Error('Received value is not a number: "' + value_str + '" ("' + body.substring(0, 100) + '")');
